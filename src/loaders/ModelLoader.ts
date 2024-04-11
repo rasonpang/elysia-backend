@@ -1,8 +1,14 @@
 import { ElysiaApp } from "@/interfaces/Elysia";
+import { readdir } from "node:fs/promises";
 
 async function ModelLoader(app: ElysiaApp) {
+	const targetSrc = "app/models";
+
 	// List of Model
-	const models = [import("@/app/models/user")];
+	let models: any = await readdir(`src/${targetSrc}`);
+	models = models.map(
+		async (modelSrc: string) => await import(`@/${targetSrc}/${modelSrc}`)
+	);
 
 	// Loading Script
 	const loadedModels = await Promise.all(
