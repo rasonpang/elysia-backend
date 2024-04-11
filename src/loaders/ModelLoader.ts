@@ -1,7 +1,7 @@
-import { ElysiaApp } from "@/interfaces/Elysia";
+import Elysia from "elysia";
 import { readdir } from "node:fs/promises";
 
-async function ModelLoader(app: ElysiaApp) {
+async function ModelLoader(app: any) {
 	const targetSrc = "app/models";
 
 	// List of Model

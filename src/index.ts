@@ -1,19 +1,31 @@
 import { Elysia } from "elysia";
+import { jwt } from "@elysiajs/jwt";
 import { swagger } from "@elysiajs/swagger";
+import { PrismaClient } from "@prisma/client";
 
 import ModelLoader from "./loaders/ModelLoader";
 import ControllerLoader from "./loaders/ControllerLoader";
 
 async function createApp() {
-	const app = new Elysia().use(swagger());
+	const db = new PrismaClient();
+
+	const app = new Elysia()
+		.use(swagger())
+		.use(
+			jwt({
+				name: "jwt",
+				secret: process.env.JWT_SECRETS!,
+				exp: "7d",
+			})
+		)
+		.decorate("db", db);
 
 	await ModelLoader(app);
 	await ControllerLoader(app);
 
 	app.onStart(() => console.log("Server is ready to serve"))
 		.onError(({ code }) => {
-			if ((code = "NOT_FOUND")) return "Route not found";
-			return "Empty";
+			return code;
 		})
 		.listen(3000);
 
