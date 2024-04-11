@@ -1,20 +1,23 @@
 import { Elysia } from "elysia";
 import { swagger } from "@elysiajs/swagger";
 
-import users from "./routes/user";
-import UserModel from "./models/user";
+import ModelLoader from "./loaders/ModelLoader";
+import ControllerLoader from "./loaders/ControllerLoader";
 
-new Elysia()
-	.use(swagger())
-	.use(UserModel)
-	.use(users)
+async function createApp() {
+	const app = new Elysia().use(swagger());
 
-	.onStart(() => {
-		console.log("Server is ready to serve");
-	})
-	.onError(({ code }) => {
-		if (code === "NOT_FOUND") return "Route not found";
+	await ModelLoader(app);
+	await ControllerLoader(app);
 
-		return "Empty";
-	})
-	.listen(3000);
+	app.onStart(() => console.log("Server is ready to serve"))
+		.onError(({ code }) => {
+			if ((code = "NOT_FOUND")) return "Route not found";
+			return "Empty";
+		})
+		.listen(3000);
+
+	return app;
+}
+
+const ElysiaApp = createApp();
