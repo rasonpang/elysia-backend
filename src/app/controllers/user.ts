@@ -1,6 +1,7 @@
 import Elysia from "elysia";
 import { encrypt } from "@/helpers/encryption";
 import { sendEmail } from "@/helpers/email";
+import { DB } from "@/interfaces/Prisma";
 
 function UserController(elysia: Elysia) {
 	elysia.group("/users" as any, (app: Elysia) => {
@@ -9,13 +10,13 @@ function UserController(elysia: Elysia) {
 				// Sign In
 				.post(
 					"/sign-in",
-					async function ({ set, cookie: { auth }, body, db, jwt }) {
+					async function ({ cookie: { auth }, body, db, jwt }) {
 						const { username, password }: any = body;
 
 						// Retrieve the user from the database
-						const user = await db.user.findUnique({
+						const user = await (db as DB).user.findUnique({
 							where: {
-								username: username,
+								username,
 								password: await encrypt(password),
 							},
 						});
@@ -35,24 +36,22 @@ function UserController(elysia: Elysia) {
 				// Sign Up
 				.post(
 					"sign-up",
-					async function ({ body, set, db, jwt }) {
+					async function ({ body, db }) {
 						const { username, password, email }: any = body;
 
 						// Check for user existence
-						const user = await db.user.findUnique({
-							where: {
-								username: username,
-							},
+						const user = await (db as DB).user.findUnique({
+							where: { username },
 						});
 
 						if (user) throw new Error("user.sign-up.user_exist");
 
 						// Create user
-						await db.user.create({
+						await (db as DB).user.create({
 							data: {
-								username: username,
+								email,
+								username,
 								password: await encrypt(password),
-								email: email,
 							},
 						});
 
@@ -67,16 +66,11 @@ function UserController(elysia: Elysia) {
 				.post(
 					"forgot-password",
 					async function ({ body, db }) {
-						const { username }: any = body;
+						const { email }: any = body;
 
 						// Retrieve the user from the database
-						const user = await db.user.findUnique({
-							where: {
-								username: username,
-							},
-							select: {
-								email: true,
-							},
+						const user = await (db as DB).user.findUnique({
+							where: { email },
 						});
 
 						if (!user)
@@ -88,8 +82,6 @@ function UserController(elysia: Elysia) {
 							subject: "Test",
 							data: "<div>kekw</div>",
 						});
-
-						console.log("test ->");
 					},
 					{
 						body: "user.input.forgot-password" as any,

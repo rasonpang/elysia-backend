@@ -3,7 +3,7 @@ import { Elysia, t } from "elysia";
 function UserModel(app: Elysia) {
 	return app.model({
 		"user.input.forgot-password": t.Object({
-			username: t.String(),
+			email: t.String(),
 		}),
 		"user.input.sign-in": t.Object({
 			username: t.String(),

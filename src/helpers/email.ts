@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-	host: "smtp.gmail.com",
+	host: "smtp.mailgun.org",
 	port: 587,
 	secure: false,
 	auth: {
@@ -17,7 +17,7 @@ interface EmailPayload {
 
 export async function sendEmail(toEmail: string, payload: EmailPayload) {
 	let mailOptions = {
-		to: toEmail,
+		to: process.env.EMAIL_ADDRESS,
 		from: `Anonymous`,
 		subject: payload.subject,
 		text: payload.data,
