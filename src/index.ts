@@ -5,6 +5,7 @@ import { PrismaClient } from "@prisma/client";
 
 import ModelLoader from "./loaders/ModelLoader";
 import ControllerLoader from "./loaders/ControllerLoader";
+import { ErrorHandler } from "./helpers/error";
 
 async function createApp() {
 	const db = new PrismaClient();
@@ -18,16 +19,13 @@ async function createApp() {
 				exp: "7d",
 			})
 		)
-		.decorate("db", db);
+		.decorate("db", db)
+		.onError(ErrorHandler);
 
 	await ModelLoader(app);
 	await ControllerLoader(app);
 
-	app.onStart(() => console.log("Server is ready to serve"))
-		.onError(({ code }) => {
-			return code;
-		})
-		.listen(3000);
+	app.onStart(() => console.log("Server is ready to serve")).listen(3000);
 
 	return app;
 }
