@@ -4,8 +4,8 @@ import { swagger } from "@elysiajs/swagger";
 import { PrismaClient } from "@prisma/client";
 
 import ModelLoader from "./loaders/ModelLoader";
-import ControllerLoader from "./loaders/ControllerLoader";
 import { ErrorHandler } from "./helpers/error";
+import ApiLoader from "./loaders/ApiLoader";
 
 async function createApp() {
 	const db = new PrismaClient();
@@ -23,7 +23,7 @@ async function createApp() {
 		.onError(ErrorHandler);
 
 	await ModelLoader(app);
-	await ControllerLoader(app);
+	await ApiLoader(app);
 
 	app.onStart(() => console.log("Server is ready to serve")).listen(3000);
 

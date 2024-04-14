@@ -1,4 +1,5 @@
 import Elysia from "elysia";
+import { DB } from "./Prisma";
 
 export type ElysiaApp = Elysia<
 	"",
@@ -32,3 +33,9 @@ export type ElysiaApp = Elysia<
 		macro: {};
 	}
 >;
+
+export type ElysiaResponse = {
+	body: any;
+	db: DB;
+	[key: string]: any;
+};
