@@ -9,6 +9,7 @@
     "@elysiajs/jwt": "^1.0.2",
     "@elysiajs/swagger": "^1.0.3",
     "@prisma/client": "5.12.1",
+    "date-fns": "^3.6.0",
     "elysia": "latest",
     "nodemailer": "^6.9.13"
   },

@@ -1,5 +1,6 @@
 import Elysia from "elysia";
 import UserController from "../controllers/user";
+import { GetJWT, VerifyJWT } from "@/helpers/encryption";
 
 function UserApi(elysia: Elysia) {
 	elysia.group("/users" as any, (app: Elysia) => {
@@ -19,6 +20,16 @@ function UserApi(elysia: Elysia) {
 				.post("forgot-password", UserController.ForgotPassword, {
 					body: "user.input.forgot-password" as any,
 				})
+
+				// Guarded Routes
+				.guard({ beforeHandle: VerifyJWT }, (app) =>
+					app
+						.resolve(GetJWT)
+						.get("/profile", UserController.Profile.Get)
+						.put("/profile", UserController.Profile.Update, {
+							body: "user.profile.input.update" as any,
+						})
+				)
 		);
 	});
 }

@@ -15,7 +15,7 @@ interface EmailPayload {
 	data: string;
 }
 
-export async function sendEmail(toEmail: string, payload: EmailPayload) {
+export async function SendEmail(toEmail: string, payload: EmailPayload) {
 	let mailOptions = {
 		to: process.env.EMAIL_ADDRESS,
 		from: `Anonymous`,

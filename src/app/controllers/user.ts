@@ -1,6 +1,8 @@
-import { encrypt } from "@/helpers/encryption";
-import { sendEmail } from "@/helpers/email";
+import { Encrypt } from "@/helpers/encryption";
+import { SendEmail } from "@/helpers/email";
 import { ElysiaResponse } from "@/interfaces/Elysia";
+import { fromUnixTime } from "date-fns";
+import { ExcludeByKeys } from "@/helpers/data";
 
 async function SignIn({ cookie: { auth }, body, db, jwt }: ElysiaResponse) {
 	const { username, password } = body;
@@ -9,14 +11,14 @@ async function SignIn({ cookie: { auth }, body, db, jwt }: ElysiaResponse) {
 	const user = await db.user.findUnique({
 		where: {
 			username,
-			password: await encrypt(password),
+			password: await Encrypt(password),
 		},
 	});
 
 	if (!user) throw new Error("user.sign-in.failed");
 
 	return auth.set({
-		value: await jwt.sign({ username }),
+		value: await jwt.sign({ id: user.id }),
 		maxAge: 604800, // 7 Days
 	});
 }
@@ -36,7 +38,7 @@ async function SignUp({ body, db }: ElysiaResponse) {
 		data: {
 			email,
 			username,
-			password: await encrypt(password),
+			password: await Encrypt(password),
 		},
 	});
 
@@ -53,16 +55,50 @@ async function ForgotPassword({ body, db }: ElysiaResponse) {
 
 	if (!user) throw new Error("user.forgot-password.invalid-username");
 
-	await sendEmail(user.email, {
+	await SendEmail(user.email, {
 		subject: "Test",
 		data: "<div>kekw</div>",
 	});
+}
+
+async function UpdateProfile({ body, token, db }: ElysiaResponse) {
+	const { dob, ...restData } = body;
+	const payload = {
+		dob: fromUnixTime(dob),
+		...restData,
+	};
+
+	await db.userProfile.upsert({
+		where: { userId: token.id },
+		create: {
+			userId: token.id,
+			...payload,
+		},
+		update: payload,
+	});
+
+	return { message: "user.profile.update.success" };
+}
+
+async function GetProfile({ token, db }: ElysiaResponse) {
+	const profile = await db.userProfile.findUnique({
+		where: { userId: token.id },
+	});
+
+	if (!profile) throw new Error("user.profile.not_exist");
+
+	const excludeList: string[] = ["id", "userId"];
+	return { data: ExcludeByKeys(profile, excludeList) };
 }
 
 const UserController = {
 	SignIn,
 	SignUp,
 	ForgotPassword,
+	Profile: {
+		Update: UpdateProfile,
+		Get: GetProfile,
+	},
 };
 
 export default UserController;

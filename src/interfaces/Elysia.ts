@@ -1,41 +1,20 @@
-import Elysia from "elysia";
+import { Cookie } from "elysia";
 import { DB } from "./Prisma";
-
-export type ElysiaApp = Elysia<
-	"",
-	false,
-	{
-		decorator: {};
-		store: {};
-		derive: {};
-		resolve: {};
-	},
-	{
-		type: {};
-		error: {};
-	},
-	{
-		schema: {};
-		macro: {};
-	},
-	{},
-	{
-		derive: {};
-		resolve: {};
-		schema: {};
-		decorator: {};
-		store: {};
-	},
-	{
-		derive: {};
-		resolve: {};
-		schema: {};
-		macro: {};
-	}
->;
+import { JWTPayloadSpec } from "@elysiajs/jwt";
 
 export type ElysiaResponse = {
 	body: any;
+	query: Record<string, string | undefined>;
+	params: never;
+	headers: Record<string, string | undefined>;
 	db: DB;
-	[key: string]: any;
+	cookie: Record<string, Cookie<any>>;
+	set: any;
+	jwt: {
+		readonly sign: (
+			morePayload: Record<string, string | number> & JWTPayloadSpec
+		) => Promise<string>;
+		readonly verify: (jwt?: string | undefined) => Promise<any>;
+	};
+	[keyName: string]: any;
 };
